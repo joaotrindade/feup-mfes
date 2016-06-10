@@ -1,0 +1,131 @@
+class SmartCity
+
+instance variables
+	public nodelist : set of EffectiveNode;
+	public tempC : int;
+	public tempP : int;
+	
+operations
+	public SmartCity : () ==> SmartCity
+		SmartCity() == 
+		(	nodelist := {};
+			tempC := 0;
+			tempP := 0;
+			return self;
+		);
+		
+		public addNode : EffectiveNode ==> ()
+		addNode(node) == 
+			nodelist:= nodelist union {node};
+		
+		-- metodo construtor de ligacao entre dois nós, recebe o max power que a ligacao pode ter
+		public buildLigacao: EffectiveNode * EffectiveNode * int ==> ()
+		buildLigacao(node1,node2,maxp) == 
+			(	node1.addLigacao(node2,maxp);
+				
+				if(node1.canConsume = true) then
+				(	zerarFlags();
+					tempC := node2.calculateConsumption();
+					zerarFlags();
+					tempP := node2.calculateProduction();
+					zerarFlags();
+				)else
+				(	if(node1.canProduce = false) then
+						(	zerarFlags();
+							tempC := node1.calculateConsumption();
+							zerarFlags();
+							tempP := node1.calculateProduction();
+							zerarFlags();
+						)
+						else
+						(	tempC := 0;
+							tempP := 0;
+						)
+				);
+				
+		)
+		post (tempC <= tempP);
+		
+		-- metodo que remove a ligacao entre dois nós
+		public removeLigacao: EffectiveNode * EffectiveNode ==> ()
+		removeLigacao(node1,node2) == 
+		(	node1.removeLigacao(node2);
+			
+			if(node1.canProduce) then
+			(	zerarFlags();
+				tempC := node2.calculateConsumption();
+				zerarFlags();
+				tempP := node2.calculateProduction();
+				zerarFlags();
+			)else
+			(	if(not(node1.canConsume)) then
+				(	zerarFlags();
+					tempC := node1.calculateConsumption();
+					zerarFlags();
+					tempP := node1.calculateProduction();
+					zerarFlags();
+				)	else
+					(		tempC := 0;
+							tempP := 0;
+					)
+			);
+		)
+		post (tempC <= tempP);
+		
+		-- calculo do consumo de um nó da cidade
+		public calculateNodeConsumption: EffectiveNode ==> int
+		calculateNodeConsumption(node) == 
+		(		dcl consumption : int := 0;
+				zerarFlags();
+				consumption := node.calculateConsumption();
+				zerarFlags();
+				return consumption;
+		);
+		
+		-- calculo da producao de um nó na cidade
+		public calculateNodeProduction: EffectiveNode ==> int
+		calculateNodeProduction(node) == 
+		(		dcl production : int := 0;
+				zerarFlags();
+				production := node.calculateProduction();
+				zerarFlags();
+				return production;
+		);
+		
+		-- metodo para zerar flags de cada nó. deve ser chamado depois do calculo de producao/consumo
+		public zerarFlags : ()  ==> ()
+		zerarFlags() ==
+			zerarFlags2(nodelist);
+		
+		-- mettodo para zear flags. chamada recursiva
+		public zerarFlags2 : set of EffectiveNode ==> ()
+		zerarFlags2(lista) == 
+		(		if (lista = {}) then (return)
+					else
+					(		let node1 in set lista in 
+								(		node1.flag := false;
+										zerarFlags2(lista\{node1});
+								)
+					)
+		);
+		
+		--public printflags : ()  ==> ()
+		--printflags() == 
+		--(	printflags2(nodelist);
+		--	return;
+		--);
+		
+		--public printflags2 : set of EffectiveNode  ==> ()
+		--printflags2(lista) == (
+		--	if (lista = {}) then return
+		--	else
+		--	(
+		--			let node1 in set lista in
+		--				(		IO`print(node1.flag);
+		--						IO`print(" ");
+		--						printflags2(lista\{node1});
+		--				)
+		--	)
+		--);
+		
+end SmartCity

@@ -1,0 +1,136 @@
+class EffectiveNode
+
+instance variables
+	public nodeId : int;
+	public canProduce : bool;
+	public canConsume : bool;
+	public productionWatts : int;
+	public consumptionWatts : int;
+	public ligacoes : set of Powerline;
+	public flag : bool;
+	public totalc : int;
+	public totalp : int;
+	public static lastid : int := 0;
+	
+operations
+	public EffectiveNode : bool * bool * int * int ==> EffectiveNode
+		EffectiveNode(cp, cc, pw, cw) == 
+		(	lastid := lastid + 1;
+			nodeId := lastid;
+			canProduce := cp;
+			canConsume := cc;
+			productionWatts := pw;
+			consumptionWatts := cw;
+			ligacoes := {};
+			flag := false;
+			totalc := 0;
+			totalp := 0;
+			return self;
+		)
+		post canProduce = false => productionWatts = 0 and canConsume = false => consumptionWatts = 0;
+		
+	
+	
+	-- Calculo do consumo de cada linha do nó
+	public callLineConsumption : set of Powerline * int * int ==> int
+		callLineConsumption(linhas, somatorio, myid) == 
+			(if (linhas = {}) then (return somatorio)
+			else
+			( flag := true;
+				let l1 in set linhas in callLineConsumption(linhas\{l1},somatorio + l1.calculateLineConsumption(),myid)
+			)
+		);
+
+	-- Calculo do consumo do nó
+	public calculateConsumption : () ==> int
+			calculateConsumption() == 
+				(if (canConsume = true and not(flag)) then
+				(		flag := true;
+					 	return consumptionWatts;
+				)
+				else
+				(	--if (not(flag)) then
+								flag := true;
+								return callLineConsumption(ligacoes, 0, nodeId);
+							--)
+							--else
+								--return 0;
+				)
+			);
+			
+		
+		
+		
+	-- Calculo da energia produzida em cada linha do nó
+	public callLineProduction : set of Powerline * int * int ==> int
+		callLineProduction(linhas, somatorio, myid) == 
+			(if (linhas = {}) then (return somatorio)
+			else
+			( flag := true;
+				let l1 in set linhas in callLineProduction(linhas\{l1},somatorio + l1.calculateLineProduction(),myid)
+			)
+		);
+		
+	-- Calculo da energia produzida no nó
+	public calculateProduction : () ==> int
+			calculateProduction() == 
+			(		if (canProduce = true and not(flag)) then
+					(		flag := true;
+						 	return productionWatts;
+					)
+					else 
+					(		--if (not(flag)) then (
+								flag := true;
+								return callLineProduction(ligacoes, 0, nodeId);
+							--)
+							--else
+								--return 0;
+					)
+			);		
+			
+			
+
+	-- adicionar ligacao a um nó
+	public addLigacao : EffectiveNode * int ==> ()
+		addLigacao(node_final, maxAmmountOfPower) == 
+				(	dcl line : Powerline := new Powerline(maxAmmountOfPower,self,node_final);
+					dcl linedois : Powerline := new Powerline(maxAmmountOfPower,node_final,self);
+					
+					ligacoes := ligacoes union {line};
+					node_final.ligacoes := node_final.ligacoes union {linedois};
+				)
+				pre (  	(canProduce = true => node_final.canProduce = false) 
+							 	and (canConsume = true => node_final.canConsume = false) 
+							  and (canConsume = true => node_final.canProduce <> true) 
+							  and (canProduce = true => node_final.canConsume <> true) 
+							  and (canProduce = true => productionWatts  < maxAmmountOfPower) 
+							  and (canConsume = true => consumptionWatts < maxAmmountOfPower) 
+							  and (node_final.canProduce = true => node_final.productionWatts  < maxAmmountOfPower) 
+							  and (node_final.canConsume = true => node_final.consumptionWatts < maxAmmountOfPower) 
+			);
+				
+				
+		-- remove ligacao de um nó, funcao recursiva
+		public removeLigacao2 : EffectiveNode * set of Powerline * set of Powerline ==> set of Powerline
+		removeLigacao2(node_final,lista,listafinal) == 
+			(	if (lista = {}) then (return listafinal)
+				else
+				( let linha1 in set lista in
+							(		if( (linha1.endPoint = self and linha1.startPoint = node_final) or (linha1.startPoint = self and linha1.endPoint = node_final) ) then
+											removeLigacao2(node_final,lista\{linha1},listafinal)
+										else
+											removeLigacao2(node_final,lista\{linha1},listafinal union {linha1})
+								)
+						)
+		);
+		
+		-- remove ligacao de um nó
+		public removeLigacao : EffectiveNode ==> ()
+		removeLigacao(node_final) == 
+		(	ligacoes := removeLigacao2(node_final,ligacoes,{});
+			node_final.ligacoes := removeLigacao2(self,node_final.ligacoes,{});
+		);
+		
+				
+	
+end EffectiveNode

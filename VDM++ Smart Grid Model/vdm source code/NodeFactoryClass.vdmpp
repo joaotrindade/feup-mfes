@@ -1,0 +1,21 @@
+class NodeFactoryClass
+types
+values
+instance variables
+operations
+	-- metodo construtor de consumidores
+	public buildConsumer : int ==> EffectiveNode
+					buildConsumer(consumedPower) == 
+						return new EffectiveNode(false,true,0,consumedPower);
+					
+		-- metodo construtor de plantas geradoras de energia
+		public buildPlant : int ==> EffectiveNode
+			buildPlant(producedPower) == 
+				return new EffectiveNode(true,false,producedPower,0);
+		
+		-- metodo construtor de distribuidores
+		public buildDistributor : () ==> EffectiveNode
+		buildDistributor() == 
+			return new EffectiveNode(false,false,0,0);
+		
+end NodeFactoryClass

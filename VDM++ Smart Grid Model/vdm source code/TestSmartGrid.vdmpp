@@ -1,0 +1,303 @@
+class TestSmartGrid is subclass of MyTestCase
+
+operations
+
+	public dumbtest: () ==> ()
+		dumbtest() == (
+			assertEqual(1,1);
+		);
+		
+		public coverageTest:() ==> ()
+			coverageTest() == (
+			testCidadeTrue();
+			testCiclo();
+			testLinhaPowerTrue();
+			testRemoveLinha();
+			testRemoveLinha2();
+			testSomatorio();
+			testGridConnectionCorrect();
+	);
+
+-- Testa uma cidade com 3 centrais, 5 consumidores, 4 distribuidores. Tem que passar em todas as pre/pos-condicoes 
+public testCidadeTrue:() ==> ()
+		testCidadeTrue() == (
+			dcl fabrica : NodeFactoryClass := new NodeFactoryClass() ;
+			dcl porto : SmartCity := new SmartCity();
+			
+			
+			dcl reatorNuclear : EffectiveNode := fabrica.buildPlant(900);
+			dcl barragem : EffectiveNode := fabrica.buildPlant(1200);
+			dcl centralEolica : EffectiveNode := fabrica.buildPlant(700);
+
+			dcl distribuidor1 : EffectiveNode := fabrica.buildDistributor();
+			dcl distribuidor2 : EffectiveNode := fabrica.buildDistributor();
+			dcl distribuidor3 : EffectiveNode := fabrica.buildDistributor();
+			dcl distribuidor4 : EffectiveNode := fabrica.buildDistributor();
+
+			dcl consumidor1 : EffectiveNode := fabrica.buildConsumer(500);
+			dcl consumidor2 : EffectiveNode := fabrica.buildConsumer(113);
+			dcl consumidor3 : EffectiveNode := fabrica.buildConsumer(500);
+			dcl consumidor4 : EffectiveNode := fabrica.buildConsumer(200);
+			dcl consumidor5 : EffectiveNode := fabrica.buildConsumer(1001);
+
+			dcl somatorio : int;
+			
+			porto.addNode(distribuidor1); porto.addNode(distribuidor2); porto.addNode(distribuidor3); porto.addNode(distribuidor4);
+			porto.addNode(consumidor1); porto.addNode(consumidor2); porto.addNode(consumidor3); porto.addNode(consumidor4); porto.addNode(consumidor5); 
+			porto.addNode(reatorNuclear); porto.addNode(barragem); porto.addNode(centralEolica); 
+			
+			IO`println("Adicionado Ligacao Dist1 Dist2 ");porto.buildLigacao(distribuidor1,distribuidor2,1000);
+			IO`println("Adicionado Ligacao Dist1 Dist3 ");porto.buildLigacao(distribuidor1,distribuidor3,1000);
+			IO`println("Adicionado Ligacao Dist1 Dist4 ");porto.buildLigacao(distribuidor1,distribuidor4,1000);
+			IO`println("Adicionado Ligacao Dist2 Dist3 ");porto.buildLigacao(distribuidor2,distribuidor3,1000);
+			IO`println("Adicionado Ligacao Dist2 Dist4 ");porto.buildLigacao(distribuidor2,distribuidor4,1000);
+			IO`println("Adicionado Ligacao Dist3 Dist4 ");porto.buildLigacao(distribuidor3,distribuidor4,1000);
+			IO`println("Adicionada Ligacao NuclearPlant Dist3 ");porto.buildLigacao(distribuidor3,reatorNuclear,1000);
+			IO`println("Adicionada Ligacao Consumidor Dist2 ");porto.buildLigacao(consumidor1,distribuidor2,1000);
+			IO`println("Adicionada Ligacao Consumidor2 Dist4 ");porto.buildLigacao(consumidor2,distribuidor4,1000);
+			IO`println("Adicionada Ligacao WindPlant Dist2 ");porto.buildLigacao(centralEolica,distribuidor1,1000);
+			IO`println("Adicionada Ligacao Consumidor3 Dist4 ");porto.buildLigacao(consumidor3,distribuidor4,1000);
+			IO`println("Adicionada Ligacao Consumidor4 Dist1 ");porto.buildLigacao(distribuidor1,consumidor4,1000);
+			IO`println("Adicionada Ligacao BarragemDoAlqueva Dist2 ");porto.buildLigacao(barragem,distribuidor4,1201);
+			IO`println("Adicionada Ligacao Consumidor5 Dist1 ");porto.buildLigacao(distribuidor1,consumidor5,1002);
+		
+			somatorio := porto.calculateNodeConsumption(distribuidor2);
+			assertEqual(somatorio,2314);
+			IO`println(somatorio);
+			somatorio := porto.calculateNodeProduction(distribuidor2);
+			assertEqual(somatorio,2800);
+			IO`println(somatorio);
+		);
+	
+-- Testa uma cidade com 3 centrais, 5 consumidores, 4 distribuidores. Tem que falhar a adicionar um 3º consumidor porque a rede fica sem capacidade.
+public testCidadeFalse:() ==> ()
+		testCidadeFalse() == (
+			dcl fabrica : NodeFactoryClass := new NodeFactoryClass() ;
+			dcl porto : SmartCity := new SmartCity();
+			
+			
+			dcl reatorNuclear : EffectiveNode := fabrica.buildPlant(900);
+			dcl barragem : EffectiveNode := fabrica.buildPlant(1200);
+			dcl centralEolica : EffectiveNode := fabrica.buildPlant(700);
+			dcl centralEolica2 : EffectiveNode := fabrica.buildPlant(700);
+
+			dcl distribuidor1 : EffectiveNode := fabrica.buildDistributor();
+			dcl distribuidor2 : EffectiveNode := fabrica.buildDistributor();
+			dcl distribuidor3 : EffectiveNode := fabrica.buildDistributor();
+			dcl distribuidor4 : EffectiveNode := fabrica.buildDistributor();
+
+			dcl consumidor1 : EffectiveNode := fabrica.buildConsumer(500);
+			dcl consumidor2 : EffectiveNode := fabrica.buildConsumer(113);
+			dcl consumidor3 : EffectiveNode := fabrica.buildConsumer(500);
+			dcl consumidor4 : EffectiveNode := fabrica.buildConsumer(200);
+			dcl consumidor5 : EffectiveNode := fabrica.buildConsumer(1001);
+			
+			porto.addNode(distribuidor1); porto.addNode(distribuidor2); porto.addNode(distribuidor3); porto.addNode(distribuidor4);
+			porto.addNode(consumidor1); porto.addNode(consumidor2); porto.addNode(consumidor3); porto.addNode(consumidor4); porto.addNode(consumidor5); 
+			porto.addNode(reatorNuclear); porto.addNode(barragem); porto.addNode(centralEolica); porto.addNode(centralEolica2); 
+			
+			IO`println("Adicionado Ligacao Dist1 Dist2 ");porto.buildLigacao(distribuidor1,distribuidor2,1000);
+			IO`println("Adicionado Ligacao Dist1 Dist3 ");porto.buildLigacao(distribuidor1,distribuidor3,1000);
+			IO`println("Adicionado Ligacao Dist1 Dist4 ");porto.buildLigacao(distribuidor1,distribuidor4,1000);
+			IO`println("Adicionado Ligacao Dist2 Dist3 ");porto.buildLigacao(distribuidor2,distribuidor3,1000);
+			IO`println("Adicionado Ligacao Dist2 Dist4 ");porto.buildLigacao(distribuidor2,distribuidor4,1000);
+			IO`println("Adicionado Ligacao Dist3 Dist4 ");porto.buildLigacao(distribuidor3,distribuidor4,1000);
+			
+			IO`println("Adicionada Ligacao Plant Dist3 ");porto.buildLigacao(distribuidor3,reatorNuclear,1000);
+			--IO`println("Adicionada Ligacao CentralEolica Dist1 ");porto.buildLigacao(distribuidor1,centralEolica,1000);
+			
+			IO`println("Adicionada Ligacao Consumidor1 Dist2 ");porto.buildLigacao(consumidor1,distribuidor2,1000);
+			IO`println("Adicionada Ligacao Consumidor2 Dist4 ");porto.buildLigacao(consumidor2,distribuidor4,1000);
+			IO`println("Adicionada Ligacao Consumidor3 Dist4 ");porto.buildLigacao(consumidor3,distribuidor4,1000);
+			
+		);
+
+-- Testa uma cidade com ligações circulares. Nao deve ter problemas a calcular o somatorio. Assert deve dar verdadeiro.
+	public testCiclo:() ==> ()
+		testCiclo() == (
+			--dcl nuclearPlant : EffectiveNode := new EffectiveNode(true,false,900,0);
+			dcl dist1 : EffectiveNode := new EffectiveNode(false,false,0,0);
+			dcl dist2 : EffectiveNode := new EffectiveNode(false,false,0,0);
+			dcl dist3 : EffectiveNode := new EffectiveNode(false,false,0,0);
+			dcl dist4 : EffectiveNode := new EffectiveNode(false,false,0,0);
+			dcl consumidor : EffectiveNode := new EffectiveNode(false,true,0,500);
+			dcl consumidor2 : EffectiveNode := new EffectiveNode(false,true,0,113);
+			dcl consumidor3 : EffectiveNode := new EffectiveNode(false,true,0,500);
+			dcl consumidor4 : EffectiveNode := new EffectiveNode(false,true,0,200);
+			dcl consumidor5 : EffectiveNode := new EffectiveNode(false,true,0,1001);
+			dcl somatorio : int;
+			dist1.addLigacao(dist2,1000);
+			dist1.addLigacao(dist3,1000);
+			dist1.addLigacao(dist4,1000);
+			dist2.addLigacao(dist3,1000);
+			dist2.addLigacao(dist4,1000);
+			dist3.addLigacao(dist4,1000);
+			dist2.addLigacao(consumidor,1000);
+			dist4.addLigacao(consumidor2,1000);
+			dist4.addLigacao(consumidor3,1000);
+			dist1.addLigacao(consumidor4,1000);
+			dist3.addLigacao(consumidor5,1002);
+			somatorio := dist2.calculateConsumption();
+			assertEqual(somatorio,2314);
+			IO`println(somatorio); 
+		);
+		
+		
+		public testLinhaPowerTrue:() ==> ()
+		testLinhaPowerTrue() == (
+			dcl porto : SmartCity := new SmartCity();
+			dcl dist1 : EffectiveNode := new EffectiveNode(false,false,0,0);
+			dcl nuclearPlant : EffectiveNode := new EffectiveNode(true,false,900,0);
+			dcl consumidor : EffectiveNode := new EffectiveNode(false,true,0,500);
+			
+			
+			porto.addNode(dist1); porto.addNode(nuclearPlant); porto.addNode(consumidor);
+			
+			porto.buildLigacao(dist1,nuclearPlant,1000);
+			IO`println("Adicionado Consumidor de 500W a um Dist1 com uma linha que suporta no Maximo 501W ");porto.buildLigacao(dist1,consumidor,501);
+		);
+		
+		public testRemoveLinha:() ==> ()
+		 testRemoveLinha() == (
+			dcl porto : SmartCity := new SmartCity();
+			dcl dist1 : EffectiveNode := new EffectiveNode(false,false,0,0);
+			dcl nuclearPlant : EffectiveNode := new EffectiveNode(true,false,900,0);
+			dcl nuclearPlant2 : EffectiveNode := new EffectiveNode(true,false,1000,0);
+			dcl consumidor : EffectiveNode := new EffectiveNode(false,true,0,500);
+			dcl consumidor2 : EffectiveNode := new EffectiveNode(false,true,0,500);
+			dcl somatorio : int;
+			
+			porto.addNode(dist1); porto.addNode(nuclearPlant); porto.addNode(nuclearPlant2); porto.addNode(consumidor);  porto.addNode(consumidor2);
+			
+			porto.buildLigacao(dist1,nuclearPlant,1000);
+			porto.buildLigacao(dist1,consumidor,1000);
+			porto.buildLigacao(dist1,nuclearPlant2,1001);
+			porto.buildLigacao(dist1,consumidor2,1000);
+			
+			porto.zerarFlags();
+			somatorio := dist1.calculateProduction();
+			IO`println(somatorio);
+			porto.zerarFlags();
+			
+			porto.removeLigacao(dist1,nuclearPlant);
+			
+			porto.zerarFlags();
+			somatorio := dist1.calculateProduction();
+			IO`println(somatorio);
+			porto.zerarFlags();
+			
+			porto.zerarFlags();
+			somatorio := dist1.calculateConsumption();
+			IO`println(somatorio);
+			porto.zerarFlags();
+			
+			porto.removeLigacao(dist1,consumidor);
+			
+			porto.zerarFlags();
+			somatorio := dist1.calculateConsumption();
+			IO`println(somatorio);
+			porto.zerarFlags();
+		);
+		
+		public testRemoveLinha2:() ==> ()
+		 testRemoveLinha2() == (
+			dcl porto : SmartCity := new SmartCity();
+			dcl dist1 : EffectiveNode := new EffectiveNode(false,false,0,0);
+			dcl nuclearPlant : EffectiveNode := new EffectiveNode(true,false,900,0);
+			dcl nuclearPlant2 : EffectiveNode := new EffectiveNode(true,false,1000,0);
+			dcl consumidor : EffectiveNode := new EffectiveNode(false,true,0,500);
+			dcl consumidor2 : EffectiveNode := new EffectiveNode(false,true,0,500);
+			dcl somatorio : int;
+			
+			porto.addNode(dist1); porto.addNode(nuclearPlant); porto.addNode(nuclearPlant2); porto.addNode(consumidor);  porto.addNode(consumidor2);
+			
+			porto.buildLigacao(dist1,nuclearPlant,1000);
+			porto.buildLigacao(dist1,consumidor,1000);
+			porto.buildLigacao(dist1,nuclearPlant2,1001);
+			porto.buildLigacao(dist1,consumidor2,1000);
+			
+			porto.zerarFlags();
+			somatorio := dist1.calculateProduction();
+			IO`println(somatorio);
+			porto.zerarFlags();
+			
+			porto.removeLigacao(nuclearPlant,dist1);
+			
+			porto.zerarFlags();
+			somatorio := dist1.calculateProduction();
+			IO`println(somatorio);
+			porto.zerarFlags();
+			
+			porto.zerarFlags();
+			somatorio := dist1.calculateConsumption();
+			IO`println(somatorio);
+			porto.zerarFlags();
+			
+			porto.removeLigacao(consumidor,dist1);
+			
+			porto.zerarFlags();
+			somatorio := dist1.calculateConsumption();
+			IO`println(somatorio);
+			porto.zerarFlags();
+		);
+		
+		public testLinhaPowerFalse:() ==> ()
+		testLinhaPowerFalse() == (
+			dcl porto : SmartCity := new SmartCity();
+			dcl dist1 : EffectiveNode := new EffectiveNode(false,false,0,0);
+			dcl nuclearPlant : EffectiveNode := new EffectiveNode(true,false,900,0);
+			dcl consumidor : EffectiveNode := new EffectiveNode(false,true,0,500);
+			
+			porto.addNode(dist1); porto.addNode(nuclearPlant); porto.addNode(consumidor);
+			
+			porto.buildLigacao(dist1,nuclearPlant,1000);
+			IO`println("Adicionado Consumidor de 500W a um Dist1 com uma linha que suporta no Maximo 499W ");porto.buildLigacao(dist1,consumidor,499);
+		);
+	
+	
+
+	public testSomatorio:() ==> ()
+		testSomatorio() == (
+			dcl porto : SmartCity := new SmartCity();
+			dcl dist1 : EffectiveNode := new EffectiveNode(false,false,0,0);
+			dcl consumidor : EffectiveNode := new EffectiveNode(false,true,0,100);
+			dcl consumidor2 : EffectiveNode := new EffectiveNode(false,true,0,100);
+			dcl nuclearplant : EffectiveNode := new EffectiveNode(true,false,500,0);
+			dcl somatorio : int;
+			porto.addNode(dist1);
+			porto.addNode(consumidor);
+			porto.addNode(consumidor2);
+			porto.addNode(nuclearplant);
+			porto.buildLigacao(dist1,nuclearplant,1000);
+			porto.buildLigacao(dist1,consumidor,1000);
+			porto.buildLigacao(dist1,consumidor2,1000);
+			
+			
+			somatorio := porto.calculateNodeConsumption(dist1);
+			assertEqual(somatorio,200);
+			IO`println(somatorio); 
+		);
+	
+
+	public testGridConnectionCorrect: () ==> ()
+		testGridConnectionCorrect() == (
+			dcl nuclearPlant : EffectiveNode := new EffectiveNode(true,false,900,0);
+			dcl dist1 : EffectiveNode := new EffectiveNode(false,false,0,0);
+			dcl dist2 : EffectiveNode := new EffectiveNode(false,false,0,0);
+			dcl consumidor : EffectiveNode := new EffectiveNode(false,true,0,100);
+			
+			nuclearPlant.addLigacao(dist1,1500);
+			dist1.addLigacao(consumidor,1500);
+			dist1.addLigacao(dist2,1500);
+		);
+		
+		
+		public testGridConnectionBadLayout :() ==> ()
+			testGridConnectionBadLayout() == (
+				dcl nuclearPlant : EffectiveNode := new EffectiveNode(true,false,900,0);
+				dcl consumidor : EffectiveNode := new EffectiveNode(false,true,0,100);
+				
+				nuclearPlant.addLigacao(consumidor, 1000);
+			);
+
+end TestSmartGrid

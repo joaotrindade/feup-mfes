@@ -1,0 +1,41 @@
+class Powerline
+
+types
+	
+instance variables
+	public static lastid : int := 0;
+	public powerlineId : int ;
+	public maxPower : int;
+	public startPoint : EffectiveNode;
+	public endPoint : EffectiveNode;
+
+inv maxPower > 0;
+inv startPoint <> endPoint ; 
+
+operations
+	public Powerline : int * EffectiveNode * EffectiveNode ==> Powerline
+	Powerline (mpower, node1, node2 ) == 
+		(	lastid:=lastid + 1;
+			powerlineId := lastid;
+			maxPower := mpower;
+			startPoint := node1;
+			endPoint := node2;
+			return self;
+	);
+	-- calculo do consumo na linha
+	public calculateLineConsumption : () ==> int
+	calculateLineConsumption() == 
+		(	--if (not(startPoint.flag))  then (return startPoint.calculateConsumption() )
+		 if (not(endPoint.flag)) then (return endPoint.calculateConsumption())
+			else return 0;
+	);
+	
+	-- calculo da producao na linha 
+	public calculateLineProduction : () ==> int
+	calculateLineProduction() == 
+		(	--if (not(startPoint.flag))  then (return startPoint.calculateProduction())
+			 if (not(endPoint.flag)) then (return endPoint.calculateProduction())
+			else return 0;
+	);
+	
+end Powerline
